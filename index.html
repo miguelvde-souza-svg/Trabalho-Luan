@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Login e Validação</title>
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --error-color: #ef4444;
+      --success-color: #10b981;
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-color: #1f2937;
+      --border-color: #d1d5db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+      transition: all 0.3s ease;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: var(--text-color);
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+
+    /* Estilos de Validação */
+    .form-group.error input {
+      border-color: var(--error-color);
+      background-color: #fef2f2;
+    }
+
+    .form-group.error input:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    }
+
+    .form-group.success input {
+      border-color: var(--success-color);
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .form-group.error .error-message {
+      display: block;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Alert Global */
+    .alert {
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .alert.alert-error {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+
+    .alert.alert-success {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid #34d399;
+    }
+
+    /* Area Restrita/Painel (Após Login) */
+    .dashboard {
+      display: none;
+      text-align: center;
+    }
+
+    .dashboard h2 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    .dashboard p {
+      margin-bottom: 20px;
+      color: #4b5563;
+    }
+
+    .dashboard .btn-logout {
+      background-color: #6b7280;
+    }
+
+    .dashboard .btn-logout:hover {
+      background-color: #4b5563;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Alerta Global de Status -->
+    <div id="globalAlert" class="alert"></div>
+
+    <!-- FORMULÁRIO DE LOGIN -->
+    <form id="loginForm" novalidate>
+      <div class="header">
+        <h1>Acessar Conta</h1>
+        <p>Preencha todos os campos corretamente</p>
+      </div>
+
+      <!-- Campo Usuário -->
+      <div class="form-group" id="group-username">
+        <label for="username">Nome de Usuário</label>
+        <input 
+          type="text" 
+          id="username" 
+          placeholder="Digite seu usuário (sem espaços)"
+          autocomplete="off"
+        >
+        <span class="error-message">Este campo é obrigatório e não pode conter espaços.</span>
+      </div>
+
+      <!-- Campo E-mail -->
+      <div class="form-group" id="group-email">
+        <label for="email">E-mail</label>
+        <input 
+          type="email" 
+          id="email" 
+          placeholder="exemplo@dominio.com"
+          autocomplete="off"
+        >
+        <span class="error-message">Digite um e-mail válido sem espaços.</span>
+      </div>
+
+      <!-- Campo Senha -->
+      <div class="form-group" id="group-password">
+        <label for="password">Senha</label>
+        <input 
+          type="password" 
+          id="password" 
+          placeholder="Sua senha secreta"
+        >
+        <span class="error-message">A senha não pode estar vazia ou conter apenas espaços.</span>
+      </div>
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <!-- ÁREA RESTRITA (Exibida após a validação com sucesso) -->
+    <div id="dashboard" class="dashboard">
+      <h2>Bem-vindo(a)!</h2>
+      <p id="userGreeting"></p>
+      <p>Você acessou o sistema com sucesso. Todos os dados foram validados e limpos.</p>
+      <button type="button" class="btn-logout" id="btnLogout">Sair</button>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Elementos do DOM
+      const form = document.getElementById('loginForm');
+      const dashboard = document.getElementById('dashboard');
+      const globalAlert = document.getElementById('globalAlert');
+      const userGreeting = document.getElementById('userGreeting');
+      const btnLogout = document.getElementById('btnLogout');
+
+      const inputs = {
+        username: document.getElementById('username'),
+        email: document.getElementById('email'),
+        password: document.getElementById('password')
+      };
+
+      // REGRA 1: Bloquear a tecla Espaço em tempo real em campos que não aceitam nenhum espaço
+      const noSpaceFields = [inputs.username, inputs.email, inputs.password];
+
+      noSpaceFields.forEach(input => {
+        // Impede digitação do espaço
+        input.addEventListener('keydown', (e) => {
+          if (e.key === ' ' || e.keyCode === 32) {
+            e.preventDefault();
+            showInputError(input, 'Espaços não são permitidos neste campo.');
+          }
+        });
+
+        // Caso o usuário COPIE e COLE (Ctrl+V) texto com espaços
+        input.addEventListener('input', () => {
+          if (input.value.includes(' ')) {
+            input.value = input.value.replace(/\s+/g, '');
+            showInputError(input, 'Os espaços colados foram removidos automaticamente.');
+          } else {
+            clearInputError(input);
+          }
+        });
+      });
+
+      // Funções de Validação Específicas
+      function isNotEmpty(value) {
+        return value.trim().length > 0;
+      }
+
+      function isValidEmail(email) {
+        // RegEx para e-mail válido sem espaços
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email.trim());
+      }
+
+      // Exibir Erro no Campo
+      function showInputError(input, message) {
+        const formGroup = input.parentElement;
+        const errorMessage = formGroup.querySelector('.error-message');
+        
+        if (message) {
+          errorMessage.textContent = message;
+        }
+
+        formGroup.classList.add('error');
+        formGroup.classList.remove('success');
+      }
+
+      // Limpar Erro do Campo
+      function clearInputError(input) {
+        const formGroup = input.parentElement;
+        formGroup.classList.remove('error');
+        formGroup.classList.add('success');
+      }
+
+      // Mostrar Alerta Global
+      function showAlert(message, type) {
+        globalAlert.textContent = message;
+        globalAlert.className = `alert alert-${type}`;
+        globalAlert.style.display = 'block';
+      }
+
+      function hideAlert() {
+        globalAlert.style.display = 'none';
+      }
+
+      // Validação Completa do Formulário no Envio (Submit)
+      form.addEventListener('submit', (e) => {
+        e.preventDefault(); // Impede recarregamento da página
+        hideAlert();
+
+        // 1. Captura e higieniza os dados (Tratamento)
+        const data = {
+          username: inputs.username.value.trim(),
+          email: inputs.email.value.trim(),
+          password: inputs.password.value.trim()
+        };
+
+        let isValid = true;
+
+        // Validar Nome de Usuário
+        if (!isNotEmpty(data.username)) {
+          showInputError(inputs.username, 'O nome de usuário é obrigatório.');
+          isValid = false;
+        } else {
+          clearInputError(inputs.username);
+        }
+
+        // Validar E-mail
+        if (!isNotEmpty(data.email)) {
+          showInputError(inputs.email, 'O e-mail é obrigatório.');
+          isValid = false;
+        } else if (!isValidEmail(data.email)) {
+          showInputError(inputs.email, 'Insira um e-mail válido (ex: nome@dominio.com).');
+          isValid = false;
+        } else {
+          clearInputError(inputs.email);
+        }
+
+        // Validar Senha
+        if (!isNotEmpty(data.password)) {
+          showInputError(inputs.password, 'A senha é obrigatória.');
+          isValid = false;
+        } else if (data.password.length < 6) {
+          showInputError(inputs.password, 'A senha deve ter no mínimo 6 caracteres.');
+          isValid = false;
+        } else {
+          clearInputError(inputs.password);
+        }
+
+        // Processamento Final
+        if (!isValid) {
+          showAlert('Por favor, corrija os erros nos campos indicados.', 'error');
+        } else {
+          // Sucesso na validação
+          showAlert('Autenticando...', 'success');
+
+          // Simula uma requisição de Login/Servidor
+          setTimeout(() => {
+            form.style.display = 'none';
+            globalAlert.style.display = 'none';
+            dashboard.style.display = 'block';
+            userGreeting.textContent = `Olá, ${data.username}!`;
+            
+            console.log('Dados Limpos Enviados para o Servidor:', data);
+          }, 1000);
+        }
+      });
+
+      // Botão Sair / Resetar Tela
+      btnLogout.addEventListener('click', () => {
+        form.reset();
+        
+        // Remove classes de sucesso/erro dos campos
+        Object.values(inputs).forEach(input => {
+          const group = input.parentElement;
+          group.classList.remove('error', 'success');
+        });
+
+        dashboard.style.display = 'none';
+        form.style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>
